@@ -5,8 +5,10 @@ from langdetect import detect
 from models import NewsItem, Reaction, NestedReaction, Image
 from typing import List
 import random
+from database import init_db, store_news_item, get_latest_news_items
 
 NEWS_PAGE = "https://www.waldnet.nl/nieuws.php"
+MAX_NEWS_ITEMS = 10  
 
 # List of common User-Agent strings
 USER_AGENTS = [
@@ -126,6 +128,10 @@ def print_news_item(news_item: NewsItem) -> None:
     print("-" * 50)
 
 try:
+    # Initialize database
+    print("Initializing database...")
+    init_db()
+    
     # Fetch the page content with headers
     print("Fetching news page...")
     response = requests.get(NEWS_PAGE, headers=get_random_headers())
@@ -135,7 +141,7 @@ try:
         soup = BeautifulSoup(response.text, 'html.parser')
         news_items_html = soup.find_all('div', class_='nieuws-item')
         
-        for news_item_html in news_items_html[:10]:
+        for news_item_html in news_items_html[:MAX_NEWS_ITEMS]:
             # Get the title
             title = ""
             title_elem = news_item_html.find('h2', class_='titel')
@@ -184,11 +190,24 @@ try:
                 image=image
             )
             
+            # Store in database
+            try:
+                news_item_id = store_news_item(news_item)
+                print(f"Stored news item with ID: {news_item_id}")
+            except Exception as e:
+                print(f"Failed to store news item: {e}")
+            
             # Print the news item
             print_news_item(news_item)
             
             # Add a small delay between fetching reactions
             time.sleep(1)
+            
+        # Print latest items from database
+        print("\nLatest items from database:")
+        latest_items = get_latest_news_items(5)
+        for item in latest_items:
+            print_news_item(item)
     else:
         print(f"Failed to fetch page. Status code: {response.status_code}")
 
