@@ -33,7 +33,3 @@ python main.py
 ```
 
 The script will fetch the latest news items and their reactions, displaying them in a formatted output.
-
-## Note
-
-This script is for educational purposes only. Please respect the website's terms of service and robots.txt when using this script.
