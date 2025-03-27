@@ -1,3 +1,4 @@
-beautifulsoup4
 requests
+beautifulsoup4
+langdetect
 pydantic
